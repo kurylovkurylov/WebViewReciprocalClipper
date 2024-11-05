@@ -10,12 +10,14 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(
       biasAttachment(*processorRef.state.getParameter(ID::bias.getParamID()),
                      biasSliderRelay),
       outAttachment(*processorRef.state.getParameter(ID::out.getParamID()),
-                    outSliderRelay) {
+                    outSliderRelay),
+      mixAttachment(*processorRef.state.getParameter(ID::mix.getParamID()),
+                    mixSliderRelay) {
   juce::ignoreUnused(processorRef);
   addAndMakeVisible(webView);
-  webView.goToURL("https://www.juce.com");
+  webView.goToURL("http://127.0.0.1:5173");
 
-  setSize(800, 600);
+  setSize(200, 300);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {}

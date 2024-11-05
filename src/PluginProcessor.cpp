@@ -101,20 +101,23 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate,
   spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
   spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
 
+  constexpr float sliderRampTime = .005f;
+
   chain.get<static_cast<int>(ChainPosition::DrivePreGain)>()
-      .setRampDurationSeconds(.05f);
+      .setRampDurationSeconds(sliderRampTime);
   chain.get<static_cast<int>(ChainPosition::DrivePostGain)>()
-      .setRampDurationSeconds(.05f);
+      .setRampDurationSeconds(sliderRampTime);
   chain.get<static_cast<int>(ChainPosition::OutGain)>().setRampDurationSeconds(
-      .05f);
+      sliderRampTime);
 
   auto dcCoeff = dsp::IIR::Coefficients<float>::makeFirstOrderHighPass(
       getSampleRate(), 1.0f);
 
-  chain.get<static_cast<int>(ChainPosition::DCFilter)>().state = *dcCoeff;
+  dcFilter.state = *dcCoeff;
 
   chain.prepare(spec);
   dryWetMixer.prepare(spec);
+  dcFilter.prepare(spec);
 }
 
 void AudioPluginAudioProcessor::releaseResources() {
@@ -168,11 +171,13 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   chain.get<static_cast<int>(ChainPosition::OutGain)>().setGainDecibels(
       parameters.out.get());
 
-  dryWetMixer.setWetMixProportion(parameters.mix.get());
+  dryWetMixer.setWetMixProportion(parameters.mix.get() * .01f);
 
   dryWetMixer.pushDrySamples(block);
   chain.process(context);
   dryWetMixer.mixWetSamples(block);
+
+  dcFilter.process(context);
 }
 
 //==============================================================================

@@ -29,7 +29,7 @@ public:
             AudioParameterFloatAttributes{}.withLabel("dB"))),
         mix(addToLayout<AudioParameterFloat>(
             layout, ID::mix, "Mix", NormalisableRange<float>{0.f, 100.f, .1f},
-            0.0f, AudioParameterFloatAttributes{}.withLabel("%"))) {}
+            100.f, AudioParameterFloatAttributes{}.withLabel("%"))) {}
 
   AudioParameterFloat &drive;
   AudioParameterFloat &bias;

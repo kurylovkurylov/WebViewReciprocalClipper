@@ -21,15 +21,19 @@ private:
   WebSliderRelay driveSliderRelay{"driveSlider"};
   WebSliderRelay biasSliderRelay{"biasSlider"};
   WebSliderRelay outSliderRelay{"outSlider"};
+  WebSliderRelay mixSliderRelay{"mixSlider"};
 
   WebBrowserComponent webView{WebBrowserComponent::Options{}
+                                  .withNativeIntegrationEnabled()
                                   .withOptionsFrom(driveSliderRelay)
                                   .withOptionsFrom(biasSliderRelay)
-                                  .withOptionsFrom(outSliderRelay)};
+                                  .withOptionsFrom(outSliderRelay)
+                                  .withOptionsFrom(mixSliderRelay)};
 
   WebSliderParameterAttachment driveAttachment;
   WebSliderParameterAttachment biasAttachment;
   WebSliderParameterAttachment outAttachment;
+  WebSliderParameterAttachment mixAttachment;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
 };
