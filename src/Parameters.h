@@ -8,6 +8,7 @@ namespace ID {
 PARAMETER_ID(drive)
 PARAMETER_ID(bias)
 PARAMETER_ID(out)
+PARAMETER_ID(mix)
 
 #undef PARAMETER_ID
 } // namespace ID
@@ -25,11 +26,15 @@ public:
         out(addToLayout<AudioParameterFloat>(
             layout, ID::out, "Out",
             NormalisableRange<float>{-24.0f, 24.0f, 0.1f}, 0.0f,
-            AudioParameterFloatAttributes{}.withLabel("dB"))) {}
+            AudioParameterFloatAttributes{}.withLabel("dB"))),
+        mix(addToLayout<AudioParameterFloat>(
+            layout, ID::mix, "Mix", NormalisableRange<float>{0.f, 100.f, .1f},
+            0.0f, AudioParameterFloatAttributes{}.withLabel("%"))) {}
 
   AudioParameterFloat &drive;
   AudioParameterFloat &bias;
   AudioParameterFloat &out;
+  AudioParameterFloat &mix;
 
 private:
   template <typename Param>

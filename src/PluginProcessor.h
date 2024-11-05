@@ -8,6 +8,7 @@ using WaveShaper = dsp::WaveShaper<float, std::function<float(float)>>;
 using Filter = dsp::ProcessorDuplicator<dsp::IIR::Filter<float>,
                                         dsp::IIR::Coefficients<float>>;
 using Chain = dsp::ProcessorChain<Gain, WaveShaper, Filter, Gain, Gain>;
+using DryWet = dsp::DryWetMixer<float>;
 
 enum class ChainPosition {
   DrivePreGain,
@@ -62,6 +63,7 @@ public:
 
 private:
   Chain chain;
+  DryWet dryWetMixer;
 
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)

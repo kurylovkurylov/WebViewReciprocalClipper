@@ -29,7 +29,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor(
         };
 
         static constexpr float minBias = 1.f;
-        static constexpr float maxBias = 10.f;
+        static constexpr float maxBias = 4.f;
 
         float bias =
             minBias + (parameters.bias.get() * .01f) * (maxBias - minBias);
@@ -114,6 +114,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate,
   chain.get<static_cast<int>(ChainPosition::DCFilter)>().state = *dcCoeff;
 
   chain.prepare(spec);
+  dryWetMixer.prepare(spec);
 }
 
 void AudioPluginAudioProcessor::releaseResources() {
@@ -167,7 +168,11 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   chain.get<static_cast<int>(ChainPosition::OutGain)>().setGainDecibels(
       parameters.out.get());
 
+  dryWetMixer.setWetMixProportion(parameters.mix.get());
+
+  dryWetMixer.pushDrySamples(block);
   chain.process(context);
+  dryWetMixer.mixWetSamples(block);
 }
 
 //==============================================================================
