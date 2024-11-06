@@ -56,10 +56,15 @@ public:
   Parameters parameters;
   AudioProcessorValueTreeState state;
 
+  float getRMSIn() const { return rmsIn.getCurrentValue(); }
+  float getRMSOut() const { return rmsOut.getCurrentValue(); }
+
 private:
   Chain chain;
   DryWet dryWetMixer;
   Filter dcFilter;
+
+  LinearSmoothedValue<float> rmsIn, rmsOut;
 
   //==============================================================================
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)

@@ -17,6 +17,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(
   addAndMakeVisible(webView);
   webView.goToURL("http://127.0.0.1:5173");
 
+  startTimerHz(60);
+
   setSize(200, 300);
 }
 
@@ -31,4 +33,9 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g) {
 
 void AudioPluginAudioProcessorEditor::resized() {
   webView.setBounds(getLocalBounds());
+}
+
+void AudioPluginAudioProcessorEditor::timerCallback() {
+  webView.emitEventIfBrowserIsVisible("rmsLevelIn", processorRef.getRMSIn());
+  webView.emitEventIfBrowserIsVisible("rmsLevelOut", processorRef.getRMSOut());
 }

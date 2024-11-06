@@ -3,8 +3,8 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class AudioPluginAudioProcessorEditor final
-    : public juce::AudioProcessorEditor {
+class AudioPluginAudioProcessorEditor final : public juce::AudioProcessorEditor,
+                                              private Timer {
 public:
   explicit AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &);
   ~AudioPluginAudioProcessorEditor() override;
@@ -12,6 +12,8 @@ public:
   //==============================================================================
   void paint(juce::Graphics &) override;
   void resized() override;
+
+  void timerCallback() override;
 
 private:
   // This reference is provided as a quick way for your editor to

@@ -118,6 +118,11 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate,
   chain.prepare(spec);
   dryWetMixer.prepare(spec);
   dcFilter.prepare(spec);
+
+  rmsIn.reset(sampleRate, 0.4);
+  rmsIn.setCurrentAndTargetValue(-100.f);
+  rmsOut.reset(sampleRate, 0.4);
+  rmsOut.setCurrentAndTargetValue(-100.f);
 }
 
 void AudioPluginAudioProcessor::releaseResources() {
@@ -163,6 +168,19 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   juce::dsp::AudioBlock<float> block(buffer);
   juce::dsp::ProcessContextReplacing<float> context(block);
   // ======================================================
+  float rmsInLeft = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+  float rmsInRight = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
+  // rmsIn = Decibels::gainToDecibels((rmsInLeft + rmsInRight) * .5f);
+
+  rmsIn.skip(buffer.getNumSamples());
+
+  const auto rmsInValue =
+      Decibels::gainToDecibels((rmsInLeft + rmsInRight) * .5f);
+  rmsIn.setTargetValue(rmsInValue);
+  // if (rmsInValue < rmsIn.getCurrentValue()) {
+  // } else {
+  //   rmsIn.setCurrentAndTargetValue(rmsInValue);
+  // }
 
   chain.get<static_cast<int>(ChainPosition::DrivePreGain)>().setGainDecibels(
       parameters.drive.get());
@@ -178,6 +196,20 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
   dryWetMixer.mixWetSamples(block);
 
   dcFilter.process(context);
+
+  float rmsOutLeft = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+  float rmsOutRight = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
+  // rmsOut = Decibels::gainToDecibels((rmsOutLeft + rmsOutRight) * .5f);
+
+  rmsOut.skip(buffer.getNumSamples());
+
+  const auto rmsOutValue =
+      Decibels::gainToDecibels((rmsOutLeft + rmsOutRight) * .5f);
+  rmsOut.setTargetValue(rmsOutValue);
+  // if (rmsOutValue < rmsOut.getCurrentValue()) {
+  // } else {
+  //   rmsOut.setCurrentAndTargetValue(rmsOutValue);
+  // }
 }
 
 //==============================================================================
@@ -192,18 +224,18 @@ juce::AudioProcessorEditor *AudioPluginAudioProcessor::createEditor() {
 //==============================================================================
 void AudioPluginAudioProcessor::getStateInformation(
     juce::MemoryBlock &destData) {
-  // You should use this method to store your parameters in the memory block.
-  // You could do that either as raw data, or use the XML or ValueTree classes
-  // as intermediaries to make it easy to save and load complex data.
-  juce::ignoreUnused(destData);
+  juce::MemoryOutputStream mos(destData, true);
+  state.state.writeToStream(mos);
 }
 
 void AudioPluginAudioProcessor::setStateInformation(const void *data,
                                                     int sizeInBytes) {
-  // You should use this method to restore your parameters from this memory
-  // block, whose contents will have been created by the getStateInformation()
-  // call.
-  juce::ignoreUnused(data, sizeInBytes);
+  auto tree =
+      juce::ValueTree::readFromData(data, static_cast<size_t>(sizeInBytes));
+
+  if (tree.isValid()) {
+    state.replaceState(tree);
+  }
 }
 
 //==============================================================================
